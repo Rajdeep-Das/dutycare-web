@@ -25,6 +25,8 @@ export class ActivityDetailComponent {
   protected readonly uploading = signal(false);
   protected readonly shareUrl = signal<string | null>(null);
   protected readonly sharing = signal(false);
+  protected readonly confirmingDelete = signal(false);
+  protected readonly deleting = signal(false);
 
   protected readonly typeLabel = computed(() =>
     this.activity()?.type === 'InFacility' ? 'In-facility' : 'Outreach',
@@ -77,6 +79,26 @@ export class ActivityDetailComponent {
   protected async copyShare(): Promise<void> {
     const url = this.shareUrl();
     if (url) await navigator.clipboard.writeText(url);
+  }
+
+  protected edit(): void {
+    this.router.navigate(['/doctor', this.id, 'edit']);
+  }
+
+  protected confirmDelete(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  protected cancelDelete(): void {
+    this.confirmingDelete.set(false);
+  }
+
+  protected doDelete(): void {
+    this.deleting.set(true);
+    this.doctorApi.delete(this.id).subscribe({
+      next: () => this.router.navigate(['/doctor', 'dashboard']),
+      error: () => this.deleting.set(false),
+    });
   }
 
   protected back(): void {

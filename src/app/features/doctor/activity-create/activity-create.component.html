@@ -1,7 +1,7 @@
 <div class="max-w-lg mx-auto px-4 py-4">
   <header class="flex items-center gap-3 mb-5">
     <button type="button" (click)="cancel()" class="text-neutral-600 text-2xl leading-none">←</button>
-    <h1 class="text-title font-semibold text-doctor">New activity</h1>
+    <h1 class="text-title font-semibold text-doctor">{{ isEdit() ? 'Edit activity' : 'New activity' }}</h1>
   </header>
 
   <form (ngSubmit)="save()" class="space-y-4" novalidate>
@@ -63,7 +63,7 @@
 
     <ds-button
       type="submit"
-      label="Save activity"
+      [label]="isEdit() ? 'Save changes' : 'Save activity'"
       loadingLabel="Saving…"
       [loading]="saving()"
       [disabled]="!name() || !activityDate()"

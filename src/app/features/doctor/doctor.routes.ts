@@ -13,6 +13,11 @@ export const doctorRoutes: Routes = [
       import('./activity-create/activity-create.component').then((m) => m.ActivityCreateComponent),
   },
   {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./activity-create/activity-create.component').then((m) => m.ActivityCreateComponent),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./activity-detail/activity-detail.component').then((m) => m.ActivityDetailComponent),

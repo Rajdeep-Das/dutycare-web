@@ -69,7 +69,10 @@ Lazy `features/doctor` (`doctor.routes.ts`). Screens (§11):
       date-range/type), `ds-list-item`, `ds-empty-state`, floating add button
 - ☑ `activity-detail.component` — `ds-card`, `ds-image-uploader` (upload + delete,
       revokes object URLs), share link create + copy
-- ☑ `activity-create.component` — form → create → navigate to detail
+- ☑ `activity-create.component` — dual create/edit (reused for `:id/edit`,
+      prefills from the loaded activity)
+- ☑ Detail: **Edit** button (→ edit form) and **Delete** (inline confirm →
+      soft delete → back to dashboard)
 - ☑ `doctor-api.service` + models (search/get/create/update, image up/delete, share-link)
 - ☑ `public-share/share-view.component` — public activity view (no auth)
 - ☑ Doctor accent (`text-doctor`/`bg-doctor`) applied throughout

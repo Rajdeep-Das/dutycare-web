@@ -1,7 +1,16 @@
 <div class="max-w-lg mx-auto px-4 py-4 pb-16">
   <header class="flex items-center gap-3 mb-4">
     <button type="button" (click)="back()" class="text-neutral-600 text-2xl leading-none">←</button>
-    <h1 class="text-title font-semibold text-doctor">Activity</h1>
+    <h1 class="text-title font-semibold text-doctor flex-1">Activity</h1>
+    @if (activity()) {
+      <button
+        type="button"
+        (click)="edit()"
+        class="text-doctor font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+      >
+        Edit
+      </button>
+    }
   </header>
 
   @if (loading()) {
@@ -76,6 +85,36 @@
           [loading]="sharing()"
           (pressed)="share()"
         />
+      }
+    </section>
+
+    <!-- Delete (soft) with inline confirm -->
+    <section class="mt-8 pt-5 border-t border-neutral-200">
+      @if (confirmingDelete()) {
+        <p class="text-neutral-700 mb-2">Delete this activity?</p>
+        <div class="flex gap-2">
+          <ds-button
+            label="Delete"
+            variant="danger"
+            [block]="false"
+            [loading]="deleting()"
+            (pressed)="doDelete()"
+          />
+          <ds-button
+            label="Cancel"
+            variant="secondary"
+            [block]="false"
+            (pressed)="cancelDelete()"
+          />
+        </div>
+      } @else {
+        <button
+          type="button"
+          (click)="confirmDelete()"
+          class="text-error font-medium px-3 py-2 rounded-md hover:bg-red-50"
+        >
+          Delete activity
+        </button>
       }
     </section>
   } @else {

@@ -49,4 +49,9 @@ export class DoctorApiService {
   createOrGetShareLink(id: string): Observable<ShareLink> {
     return this.api.post<ShareLink>(`${this.base}/${id}/share-link`, {});
   }
+
+  /** Soft-deletes the activity (server sets DeletedAt). */
+  delete(id: string): Observable<void> {
+    return this.api.delete<void>(`${this.base}/${id}`);
+  }
 }
