@@ -20,19 +20,30 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 - ☑ `vercel.json` `/api/*` rewrite + SPA fallback
 - ☑ Builds clean (Tailwind utilities + tokens verified in output CSS)
 
-## Phase 1 — Design system  ☐
+## Phase 1 — Design system  ☑
 
-Tokens fixed in `shared/design-system/tokens.scss` (spacing/type/color/accents, §12).
-Build core components once, reuse everywhere:
+Tokens bridged into Tailwind v4 `@theme` (styles.scss) as the single source of
+truth → first-class utilities (`bg-primary`, `text-doctor`, `text-title`,
+`rounded-md`). Components use utilities, no inline `style=` for design values.
+`tokens.scss` keeps the spacing scale + a runtime `--accent` var that flips per
+module (`.theme-doctor` / `.theme-police`).
 
-- ☑ `tokens.scss` — spacing, type scale, neutral/primary/status, doctor/police accents
-- ☐ `Button`
-- ☐ `Card`
-- ☐ `ListItem`
-- ☐ `EmptyState`
-- ☐ `ImageUploader` (client-side resize, progress, thumbnail preview)
-- ☐ `SearchFilterBar` (config-driven filter field definitions, §11)
-- ☐ `image-resize.util.ts` real implementation
+- ☑ Token→Tailwind `@theme` bridge (palette, type scale, radii); utilities verified in build
+- ☑ `ButtonComponent` (`ds-button`) — primary/secondary/danger, loading, block; spec'd
+- ☑ `CardComponent` (`ds-card`)
+- ☑ `ListItemComponent` (`ds-list-item`) — title/subtitle/meta + leading/trailing slots
+- ☑ `EmptyStateComponent` (`ds-empty-state`)
+- ☑ `ImageUploaderComponent` (`ds-image-uploader`) — resize, thumbnail, progress;
+      emits PreparedImage, upload stays in feature services (serves list + single)
+- ☑ `SearchFilterBarComponent` (`ds-search-filter-bar`) + `search-filter.model.ts`
+      — config-driven, field types limited to text / date-range / select (§5, §11)
+- ☑ `image-resize.util.ts` — canvas resize, EXIF auto-orient via createImageBitmap
+- ☑ Login refactored onto `ds-button` + theme utilities (real-content validation, §12)
+- ☑ Accent mechanism settled: doctor/police screens use `text-doctor`/`bg-doctor`
+      utilities directly; the dead `--accent`/`.theme-*` runtime var was removed
+
+> Note: per project policy, no UI/API unit tests going forward. Verify by build
+> (`ng build`) and the local run/preview flow.
 
 ## Phase 2 — Login & shell  ◐
 
@@ -45,10 +56,10 @@ Build core components once, reuse everywhere:
       rehydrates user (role/username) on construction and expires stale tokens, so
       `authGuard` and `roleGuard` agree after a hard refresh. `isAuthenticated`
       derives from the decoded user, not the raw token.
-- ☑ `auth.service.spec.ts`: decode/refresh-rehydration/expiry verified against a
-      real backend-shaped JWT (incl. base64url `-`/`_` handling). 8/8 tests pass.
-- ☐ Final smoke against a live backend: log in → hard-refresh a `/doctor` route →
-      stay logged in (needs the API + Postgres running)
+- ☑ JWT decode verified end-to-end: real admin/admin login from the API returns a
+      token whose payload decodes correctly (base64url handled). Login round-trip
+      confirmed against the local Docker Postgres backend (bad creds → 401,
+      admin/admin → 200 + SuperAdmin token).
 
 ## Phase 3 — Doctor module  ☐
 

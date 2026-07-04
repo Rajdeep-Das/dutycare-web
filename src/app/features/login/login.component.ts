@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { landingRouteForRole } from '../../core/auth/role-redirect';
+import { ButtonComponent } from '../../shared/design-system/button/button.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ButtonComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {

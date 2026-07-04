@@ -1,20 +1,67 @@
 /* ==========================================================================
    DutyCare global styles
    Tailwind v4 + design-system tokens. Mobile-first.
+
+   The @theme block is the single source of truth for the palette, type scale
+   and radii: Tailwind generates first-class utilities from it
+   (bg-primary, text-doctor, rounded-md, text-title, ...). Components use those
+   utilities and never inline style= for design values (Plan §12).
+   tokens.scss re-exposes the same values as plain CSS custom properties for the
+   few cases that need var() (e.g. dynamic module accent).
    ========================================================================== */
 @use "app/shared/design-system/tokens";
 
 @import "tailwindcss";
 
+@theme {
+  /* --- Fonts --- */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* --- Type scale (4 sizes, Plan §12) --- */
+  --text-body: 15px;
+  --text-subtitle: 17px;
+  --text-title: 22px;
+  --text-large-title: 28px;
+
+  /* --- Radii --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* --- Neutral scale --- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-500: #64748b;
+  --color-neutral-700: #334155;
+  --color-neutral-900: #0f172a;
+
+  /* --- Primary (shared) --- */
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-soft: #eff6ff;
+
+  /* --- Status --- */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+
+  /* --- Module accents --- */
+  --color-doctor: #0d9488; /* teal */
+  --color-police: #4338ca; /* indigo */
+}
+
 html,
 body {
   margin: 0;
   min-height: 100%;
-  font-family: var(--font-family-base);
+  font-family: var(--font-sans);
   font-size: var(--text-body);
-  line-height: var(--line-height-base);
-  color: var(--neutral-900);
-  background: var(--neutral-50);
+  line-height: 1.5;
+  color: var(--color-neutral-900);
+  background: var(--color-neutral-50);
   -webkit-font-smoothing: antialiased;
 }
 
