@@ -62,7 +62,10 @@ export class AuthService {
   /** Decodes a JWT payload into an AuthUser, or null if invalid/expired. */
   private static decode(token: string): AuthUser | null {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1] ?? ''));
+      // JWT parts are base64url (-, _, no padding); atob needs standard base64.
+      let b64 = (token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const payload = JSON.parse(atob(b64));
 
       const exp = payload['exp'] as number | undefined;
       if (exp && exp * 1000 <= Date.now()) {

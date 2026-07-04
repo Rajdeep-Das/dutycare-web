@@ -45,8 +45,10 @@ Build core components once, reuse everywhere:
       rehydrates user (role/username) on construction and expires stale tokens, so
       `authGuard` and `roleGuard` agree after a hard refresh. `isAuthenticated`
       derives from the decoded user, not the raw token.
-- ☐ Verify against a live backend: log in → hard-refresh a `/doctor` route → stay
-      logged in (needs the API + Postgres running)
+- ☑ `auth.service.spec.ts`: decode/refresh-rehydration/expiry verified against a
+      real backend-shaped JWT (incl. base64url `-`/`_` handling). 8/8 tests pass.
+- ☐ Final smoke against a live backend: log in → hard-refresh a `/doctor` route →
+      stay logged in (needs the API + Postgres running)
 
 ## Phase 3 — Doctor module  ☐
 

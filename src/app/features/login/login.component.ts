@@ -36,7 +36,13 @@ export class LoginComponent {
 
     this.authApi.login({ username: this.username(), password: this.password() }).subscribe({
       next: (res) => {
-        this.auth.setSession(res.token);
+        try {
+          this.auth.setSession(res.token);
+        } catch {
+          this.loading.set(false);
+          this.error.set('Could not sign in. Please try again.');
+          return;
+        }
         const role = this.auth.user()!.role;
         this.router.navigateByUrl(landingRouteForRole(role));
       },
