@@ -1,0 +1,84 @@
+<div class="max-w-lg mx-auto px-4 py-4 pb-16">
+  <header class="flex items-center gap-3 mb-4">
+    <button type="button" (click)="back()" class="text-neutral-600 text-2xl leading-none">←</button>
+    <h1 class="text-title font-semibold text-doctor">Activity</h1>
+  </header>
+
+  @if (loading()) {
+    <p class="py-8 text-center text-neutral-500">Loading…</p>
+  } @else if (activity(); as a) {
+    <ds-card>
+      <h2 class="text-subtitle font-semibold text-neutral-900">{{ a.name }}</h2>
+      <dl class="mt-2 space-y-1 text-neutral-600">
+        <div class="flex gap-2">
+          <dt class="w-20 text-neutral-500">Date</dt>
+          <dd>{{ a.activityDate | date: 'mediumDate' }}</dd>
+        </div>
+        @if (a.place) {
+          <div class="flex gap-2">
+            <dt class="w-20 text-neutral-500">Place</dt>
+            <dd>{{ a.place }}</dd>
+          </div>
+        }
+        <div class="flex gap-2">
+          <dt class="w-20 text-neutral-500">Type</dt>
+          <dd>{{ typeLabel() }}</dd>
+        </div>
+      </dl>
+    </ds-card>
+
+    <!-- Photos -->
+    <section class="mt-5">
+      <h3 class="font-medium text-neutral-700 mb-2">Photos</h3>
+
+      @if (a.images.length > 0) {
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          @for (img of a.images; track img.id) {
+            <div class="relative aspect-square">
+              <img [src]="img.url" alt="" class="w-full h-full object-cover rounded-md" />
+              <button
+                type="button"
+                (click)="removeImage(img.id)"
+                aria-label="Remove photo"
+                class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-sm leading-none"
+              >
+                ×
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <ds-image-uploader
+        [multiple]="true"
+        [uploading]="uploading()"
+        label="Add photo"
+        (prepared)="onPrepared($event)"
+      />
+    </section>
+
+    <!-- Share -->
+    <section class="mt-6">
+      <h3 class="font-medium text-neutral-700 mb-2">Share</h3>
+      @if (shareUrl(); as url) {
+        <div class="flex gap-2">
+          <input
+            readonly
+            [value]="url"
+            class="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-neutral-600 bg-neutral-50"
+          />
+          <ds-button label="Copy" [block]="false" variant="secondary" (pressed)="copyShare()" />
+        </div>
+      } @else {
+        <ds-button
+          label="Create share link"
+          [block]="false"
+          [loading]="sharing()"
+          (pressed)="share()"
+        />
+      }
+    </section>
+  } @else {
+    <p class="py-8 text-center text-neutral-500">Activity not found.</p>
+  }
+</div>

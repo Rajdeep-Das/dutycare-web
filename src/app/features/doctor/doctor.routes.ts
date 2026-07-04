@@ -7,5 +7,14 @@ export const doctorRoutes: Routes = [
     loadComponent: () =>
       import('./dashboard/activity-list.component').then((m) => m.ActivityListComponent),
   },
-  // activity-detail, activity-create wired in the Doctor module phase.
+  {
+    path: 'create',
+    loadComponent: () =>
+      import('./activity-create/activity-create.component').then((m) => m.ActivityCreateComponent),
+  },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./activity-detail/activity-detail.component').then((m) => m.ActivityDetailComponent),
+  },
 ];

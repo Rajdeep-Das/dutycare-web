@@ -1,0 +1,28 @@
+<main class="min-h-screen bg-white">
+  <div class="max-w-lg mx-auto px-4 py-6">
+    @if (loading()) {
+      <p class="py-12 text-center text-neutral-500">Loading…</p>
+    } @else if (notFound()) {
+      <p class="py-12 text-center text-neutral-500">This link is no longer available.</p>
+    } @else if (activity(); as a) {
+      <header class="border-b border-neutral-200 pb-4 mb-4">
+        <h1 class="text-large-title font-semibold text-neutral-900">{{ a.name }}</h1>
+        <p class="mt-1 text-neutral-500">
+          {{ a.activityDate | date: 'mediumDate' }}
+          @if (a.place) { · {{ a.place }} }
+          · {{ typeLabel() }}
+        </p>
+      </header>
+
+      @if (a.images.length > 0) {
+        <div class="grid grid-cols-2 gap-2">
+          @for (img of a.images; track img.url) {
+            <img [src]="img.url" alt="" class="w-full rounded-md object-cover" />
+          }
+        </div>
+      } @else {
+        <p class="text-neutral-500">No photos for this activity.</p>
+      }
+    }
+  </div>
+</main>

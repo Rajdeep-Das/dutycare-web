@@ -1,0 +1,55 @@
+<div class="max-w-lg mx-auto pb-24">
+  <header class="sticky top-0 bg-neutral-50 px-4 pt-4 pb-3 border-b border-neutral-200 z-10">
+    <div class="flex items-center justify-between">
+      <h1 class="text-title font-semibold text-doctor">Activities</h1>
+      <button
+        type="button"
+        (click)="toggleFilters()"
+        class="text-neutral-600 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+      >
+        {{ showFilters() ? 'Hide' : 'Filter' }}
+      </button>
+    </div>
+
+    @if (showFilters()) {
+      <div class="mt-3">
+        <ds-search-filter-bar [fields]="filterFields" (search)="load($event)" />
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="px-4 py-8 text-center text-neutral-500">Loading…</p>
+  } @else if (activities().length === 0) {
+    <ds-empty-state
+      title="No activities yet"
+      message="Record a camp or outreach activity to see it here."
+    >
+      <ds-button label="Add activity" [block]="false" (pressed)="create()" />
+    </ds-empty-state>
+  } @else {
+    <ul>
+      @for (a of activities(); track a.id) {
+        <li>
+          <ds-list-item
+            [title]="a.name"
+            [subtitle]="a.place ?? ''"
+            [meta]="(a.activityDate | date: 'mediumDate') ?? ''"
+            (selected)="open(a.id)"
+          />
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Floating add button (mobile-first primary action) -->
+  <button
+    type="button"
+    (click)="create()"
+    aria-label="Add activity"
+    class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-doctor text-white text-3xl
+           leading-none shadow-lg flex items-center justify-center active:scale-95"
+  >
+    +
+  </button>
+</div>
