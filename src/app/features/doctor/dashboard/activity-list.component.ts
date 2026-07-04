@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../../shared/design-system/button/button.component';
 import { EmptyStateComponent } from '../../../shared/design-system/empty-state/empty-state.component';
 import { ListItemComponent } from '../../../shared/design-system/list-item/list-item.component';
@@ -14,6 +14,7 @@ import { ActivityListItem } from '../doctor.models';
   standalone: true,
   imports: [
     DatePipe,
+    RouterLink,
     ButtonComponent,
     EmptyStateComponent,
     ListItemComponent,

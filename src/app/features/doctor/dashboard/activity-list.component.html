@@ -2,13 +2,21 @@
   <header class="sticky top-0 bg-neutral-50 px-4 pt-4 pb-3 border-b border-neutral-200 z-10">
     <div class="flex items-center justify-between">
       <h1 class="text-title font-semibold text-doctor">Activities</h1>
-      <button
-        type="button"
-        (click)="toggleFilters()"
-        class="text-neutral-600 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-      >
-        {{ showFilters() ? 'Hide' : 'Filter' }}
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          (click)="toggleFilters()"
+          class="text-neutral-600 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+        >
+          {{ showFilters() ? 'Hide' : 'Filter' }}
+        </button>
+        <a
+          routerLink="/logout"
+          class="text-neutral-500 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+        >
+          Logout
+        </a>
+      </div>
     </div>
 
     @if (showFilters()) {

@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService, UserRole } from '../../core/auth/auth.service';
 import { ButtonComponent } from '../../shared/design-system/button/button.component';
 import { AdminApiService, AdminUser, CreateUserRequest } from './admin-api.service';
@@ -7,7 +8,7 @@ import { AdminApiService, AdminUser, CreateUserRequest } from './admin-api.servi
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule, RouterLink, ButtonComponent],
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {

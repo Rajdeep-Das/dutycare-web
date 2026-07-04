@@ -12,6 +12,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'logout',
+    loadComponent: () =>
+      import('./features/logout/logout.component').then((m) => m.LogoutComponent),
+  },
+
+  {
     path: 'doctor',
     canActivate: [authGuard, roleGuard(['Doctor'])],
     loadChildren: () =>

@@ -1,13 +1,21 @@
 <div class="max-w-lg mx-auto px-4 py-4 pb-16">
   <header class="flex items-center justify-between mb-4">
     <h1 class="text-title font-semibold text-neutral-900">Users</h1>
-    <button
-      type="button"
-      (click)="toggleCreate()"
-      class="text-primary font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-    >
-      {{ showCreate() ? 'Close' : 'Add user' }}
-    </button>
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        (click)="toggleCreate()"
+        class="text-primary font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+      >
+        {{ showCreate() ? 'Close' : 'Add user' }}
+      </button>
+      <a
+        routerLink="/logout"
+        class="text-neutral-500 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
+      >
+        Logout
+      </a>
+    </div>
   </header>
 
   <!-- Create form (inline) -->
