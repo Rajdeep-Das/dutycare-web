@@ -1,15 +1,53 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthApiService } from '../../core/api/auth-api.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { landingRouteForRole } from '../../core/auth/role-redirect';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  template: `
-    <main class="min-h-screen flex items-center justify-center p-6">
-      <div class="w-full max-w-sm text-center">
-        <h1 class="text-2xl font-semibold">DutyCare</h1>
-        <p class="mt-2 text-slate-500">Login — implemented in the Auth phase.</p>
-      </div>
-    </main>
-  `,
+  imports: [FormsModule],
+  templateUrl: './login.component.html',
 })
-export class LoginComponent {}
+export class LoginComponent {
+  private readonly authApi = inject(AuthApiService);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  protected readonly username = signal('');
+  protected readonly password = signal('');
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
+
+  constructor() {
+    // Already logged in? Skip straight to the role's landing page.
+    const role = this.auth.user()?.role;
+    if (role) {
+      this.router.navigateByUrl(landingRouteForRole(role));
+    }
+  }
+
+  protected submit(): void {
+    if (this.loading()) return;
+    this.error.set(null);
+    this.loading.set(true);
+
+    this.authApi.login({ username: this.username(), password: this.password() }).subscribe({
+      next: (res) => {
+        this.auth.setSession(res.token);
+        const role = this.auth.user()!.role;
+        this.router.navigateByUrl(landingRouteForRole(role));
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(
+          err?.status === 401
+            ? 'Invalid username or password.'
+            : 'Could not sign in. Please try again.',
+        );
+      },
+    });
+  }
+}

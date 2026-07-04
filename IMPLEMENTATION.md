@@ -34,12 +34,19 @@ Build core components once, reuse everywhere:
 - ☐ `SearchFilterBar` (config-driven filter field definitions, §11)
 - ☐ `image-resize.util.ts` real implementation
 
-## Phase 2 — Login & shell  ☐
+## Phase 2 — Login & shell  ◐
 
-- ☐ `LoginComponent` — form, calls `POST /api/auth/login`, stores session
-- ☐ Role-based redirect: Doctor → /doctor, Police → /police, SuperAdmin → admin (§3)
-- ☐ Wire `AuthService.setSession` from login response
-- ☐ Empty doctor & police shells reachable behind guards
+- ☑ `LoginComponent` — form, calls `POST /api/auth/login`, stores session
+- ☑ Role-based redirect via `landingRouteForRole` (Doctor → /doctor,
+      Police → /police, SuperAdmin → /admin, §3)
+- ☑ `AuthApiService` + `AuthService.setSession` wired from login response
+- ☑ Empty doctor & police shells reachable behind guards
+- ☑ **FIXED:** `AuthService` now decodes the JWT as the single source of truth —
+      rehydrates user (role/username) on construction and expires stale tokens, so
+      `authGuard` and `roleGuard` agree after a hard refresh. `isAuthenticated`
+      derives from the decoded user, not the raw token.
+- ☐ Verify against a live backend: log in → hard-refresh a `/doctor` route → stay
+      logged in (needs the API + Postgres running)
 
 ## Phase 3 — Doctor module  ☐
 
