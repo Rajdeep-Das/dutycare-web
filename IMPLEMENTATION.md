@@ -61,16 +61,19 @@ module (`.theme-doctor` / `.theme-police`).
       confirmed against the local Docker Postgres backend (bad creds → 401,
       admin/admin → 200 + SuperAdmin token).
 
-## Phase 3 — Doctor module  ☐
+## Phase 3 — Doctor module  ☑
 
 Lazy `features/doctor` (`doctor.routes.ts`). Screens (§11):
 
-- ☐ `activity-list.component` + `activity-search.component` (dashboard)
-- ☐ `activity-detail.component` + `activity-image-upload.component`
-- ☐ `activity-create.component`
-- ☐ Doctor API service (search/get/create/update, images, share-link)
-- ☐ `public-share/share-view.component` — public activity view (no auth)
-- ☐ Doctor accent applied so module is visually distinct
+- ☑ `activity-list.component` — dashboard: `ds-search-filter-bar` (name/place/
+      date-range/type), `ds-list-item`, `ds-empty-state`, floating add button
+- ☑ `activity-detail.component` — `ds-card`, `ds-image-uploader` (upload + delete,
+      revokes object URLs), share link create + copy
+- ☑ `activity-create.component` — form → create → navigate to detail
+- ☑ `doctor-api.service` + models (search/get/create/update, image up/delete, share-link)
+- ☑ `public-share/share-view.component` — public activity view (no auth)
+- ☑ Doctor accent (`text-doctor`/`bg-doctor`) applied throughout
+- ☑ Verified through web proxy: SPA routes serve, public share returns safe fields
 
 ## Phase 4 — Police module  ☐
 
