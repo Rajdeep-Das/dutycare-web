@@ -90,9 +90,13 @@ Lazy `features/police` (`police.routes.ts`). Screens (§11):
 - ☐ Police API service (cases, persons, phones, vehicles, search)
 - ☐ Police accent applied so module is visually distinct
 
-## Phase 5 — Admin  ☐
+## Phase 5 — Admin  ☑
 
-- ☐ `admin/user-list.component` — list + activate/deactivate (minimal, §7)
+- ☑ `admin-api.service` — list, create, setStatus
+- ☑ `admin/user-list.component` — list, inline create form (username/password/
+      role → Doctor/Police/SuperAdmin), activate/deactivate toggle
+- ☑ Self row shows "(you)" and can't be deactivated (server enforces by id too)
+- ☑ 409 → "username already taken"; verified create/list/status through web proxy
 
 ## Phase 6 — Deploy  ☐
 
