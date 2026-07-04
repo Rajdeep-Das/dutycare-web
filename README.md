@@ -15,15 +15,27 @@ design and [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for phase-by-phase progress.
 - TailwindCSS v4 (`@tailwindcss/postcss`)
 - Deployed to Vercel; `/api/*` rewritten to the backend (same-origin, no CORS)
 
-## Getting started
+## Run locally (full stack)
+
+Three terminals:
 
 ```bash
-npm install
-npm start        # ng serve
+# 1. Database (in dutycare-api) — first time also seeds admin/admin
+cd ../dutycare-api && docker compose up -d
+cd DutyCare.Api && dotnet run -- seed-admin admin admin SuperAdmin   # first run only
+
+# 2. API  → http://localhost:5066
+ASPNETCORE_ENVIRONMENT=Development dotnet run
+
+# 3. Web  → http://localhost:4200
+cd ../../dutycare-web && npm install && npm start
 ```
 
-For local API calls, either run against a deployed backend or add a dev proxy
-for `/api`.
+Open http://localhost:4200 and log in with **admin / admin**.
+
+`npm start` uses `proxy.conf.json` to forward `/api/*` to the API on :5066, so
+frontend calls stay same-origin exactly like the Vercel rewrite in production —
+no CORS, no code change between local and deployed.
 
 ## Layout
 
