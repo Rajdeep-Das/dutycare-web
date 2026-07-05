@@ -54,12 +54,21 @@ export class ShareViewComponent {
     return i === null ? null : (this.images()[i] ?? null);
   });
 
+  /** CSS transform for the carousel track: base slide position + live drag delta. */
+  protected readonly trackTransform = computed(() => {
+    const i = this.openIndex() ?? 0;
+    return `translate3d(calc(${-i * 100}% + ${this.dragDx()}px), 0, 0)`;
+  });
+
   protected readonly isZoomed = computed(() => this.zoom() > MIN_ZOOM);
 
-  /** Live horizontal offset (px) while swiping between photos (not zoomed). */
-  protected readonly swipeX = signal(0);
-  /** True while a swipe is in progress, so the image follows the finger without transition. */
+  // --- Carousel track (Google-Photos-style horizontal slide) ---
+  /** Live horizontal finger delta (px) added to the track while swiping. */
+  protected readonly dragDx = signal(0);
+  /** True while a swipe is in progress → track follows the finger with no transition. */
   protected readonly swiping = signal(false);
+  /** Stage pixel width, used to convert the drag delta into a fraction of a slide. */
+  protected readonly stageWidth = signal(0);
 
   private dragging = false;
   private dragStartX = 0;
@@ -71,8 +80,10 @@ export class ShareViewComponent {
   private swipeActive = false;
   private swipeStartX = 0;
   private swipeStartY = 0;
-  /** px of horizontal travel past which a swipe commits to prev/next. */
-  private static readonly SWIPE_THRESHOLD = 60;
+  /** Fraction of the stage width a swipe must cross to commit to prev/next. */
+  private static readonly SWIPE_COMMIT_FRACTION = 0.18;
+  /** Absolute floor (px) so a fast flick on a narrow screen still commits. */
+  private static readonly SWIPE_MIN_PX = 45;
 
   constructor() {
     const token = this.route.snapshot.paramMap.get('token');
@@ -101,18 +112,18 @@ export class ShareViewComponent {
     document.body.style.overflow = '';
   }
 
-  // --- Navigation ---
+  // --- Navigation (clamped at the ends, like Google Photos — no wrap) ---
   protected next(): void {
     const i = this.openIndex();
-    if (i === null) return;
-    this.openIndex.set((i + 1) % this.images().length);
+    if (i === null || i >= this.images().length - 1) return;
+    this.openIndex.set(i + 1);
     this.resetZoom();
   }
 
   protected prev(): void {
     const i = this.openIndex();
-    if (i === null) return;
-    this.openIndex.set((i - 1 + this.images().length) % this.images().length);
+    if (i === null || i <= 0) return;
+    this.openIndex.set(i - 1);
     this.resetZoom();
   }
 
@@ -153,9 +164,9 @@ export class ShareViewComponent {
     else this.zoomOut();
   }
 
-  // --- Pointer gestures: pan when zoomed, swipe-to-navigate otherwise ---
+  // --- Pointer gestures: pan when zoomed, swipe the track otherwise ---
   protected onPointerDown(event: PointerEvent): void {
-    (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
     if (this.isZoomed()) {
       // Drag to pan.
       this.dragging = true;
@@ -164,7 +175,8 @@ export class ShareViewComponent {
       this.panStartX = this.panX();
       this.panStartY = this.panY();
     } else if (this.images().length > 1) {
-      // Swipe to change photo.
+      // Swipe the carousel track.
+      this.stageWidth.set((event.currentTarget as HTMLElement).clientWidth || window.innerWidth);
       this.swipeActive = true;
       this.swipeStartX = event.clientX;
       this.swipeStartY = event.clientY;
@@ -178,16 +190,16 @@ export class ShareViewComponent {
       this.panY.set(this.panStartY + (event.clientY - this.dragStartY));
       return;
     }
-    if (this.swipeActive) {
-      const dx = event.clientX - this.swipeStartX;
-      const dy = event.clientY - this.swipeStartY;
-      // Once the gesture is clearly vertical, abandon the swipe (let it scroll/dismiss).
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) {
-        this.cancelSwipe();
-        return;
-      }
-      this.swipeX.set(dx);
+    if (!this.swipeActive) return;
+
+    const dx = event.clientX - this.swipeStartX;
+    const dy = event.clientY - this.swipeStartY;
+    // Once the gesture is clearly vertical, abandon the swipe (let it scroll/dismiss).
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) {
+      this.cancelSwipe();
+      return;
     }
+    this.dragDx.set(this.withEdgeResistance(dx));
   }
 
   protected onPointerUp(): void {
@@ -195,20 +207,35 @@ export class ShareViewComponent {
       this.dragging = false;
       return;
     }
-    if (this.swipeActive) {
-      const dx = this.swipeX();
-      this.swipeActive = false;
-      this.swiping.set(false);
-      this.swipeX.set(0);
-      if (dx <= -ShareViewComponent.SWIPE_THRESHOLD) this.next();
-      else if (dx >= ShareViewComponent.SWIPE_THRESHOLD) this.prev();
-    }
+    if (!this.swipeActive) return;
+
+    const dx = this.dragDx();
+    this.swipeActive = false;
+    this.swiping.set(false);
+
+    const threshold = Math.max(
+      ShareViewComponent.SWIPE_MIN_PX,
+      this.stageWidth() * ShareViewComponent.SWIPE_COMMIT_FRACTION,
+    );
+    // The track transitions back / onward smoothly because `swiping` is now false;
+    // set dragDx to 0 and let openIndex drive the final position.
+    this.dragDx.set(0);
+    if (dx <= -threshold) this.next();
+    else if (dx >= threshold) this.prev();
+  }
+
+  /** Rubber-band the drag when there is no neighbour in that direction. */
+  private withEdgeResistance(dx: number): number {
+    const i = this.openIndex() ?? 0;
+    const atStart = i <= 0 && dx > 0;
+    const atEnd = i >= this.images().length - 1 && dx < 0;
+    return atStart || atEnd ? dx * 0.35 : dx;
   }
 
   private cancelSwipe(): void {
     this.swipeActive = false;
     this.swiping.set(false);
-    this.swipeX.set(0);
+    this.dragDx.set(0);
   }
 
   // --- Keyboard ---

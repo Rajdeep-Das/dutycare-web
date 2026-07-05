@@ -85,22 +85,34 @@
       >
         @if (images().length > 1) {
           <!-- Arrows: hidden on touch/small screens where users swipe instead -->
-          <button type="button" class="gp-nav gp-nav-desktop left-2 sm:left-5" (click)="prev()" aria-label="Previous">
+          <button type="button" class="gp-nav gp-nav-desktop left-2 sm:left-5" (click)="prev()" aria-label="Previous" [disabled]="(openIndex() ?? 0) === 0">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <button type="button" class="gp-nav gp-nav-desktop right-2 sm:right-5" (click)="next()" aria-label="Next">
+          <button type="button" class="gp-nav gp-nav-desktop right-2 sm:right-5" (click)="next()" aria-label="Next" [disabled]="(openIndex() ?? 0) === images().length - 1">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         }
 
-        <img
-          [src]="img.url"
-          alt=""
-          class="max-w-full max-h-full object-contain will-change-transform pointer-events-none"
-          [style.transform]="'translate(' + (panX() + swipeX()) + 'px,' + panY() + 'px) scale(' + zoom() + ')'"
-          [style.transition]="swiping() ? 'none' : 'transform 0.15s ease-out'"
-          draggable="false"
-        />
+        <!-- Carousel track: all slides side by side; translated by index + drag -->
+        <div
+          class="gp-track"
+          [class.gp-track-dragging]="swiping()"
+          [style.transform]="trackTransform()"
+        >
+          @for (slide of images(); track slide.url; let idx = $index) {
+            <div class="gp-slide">
+              <img
+                [src]="slide.url"
+                alt=""
+                class="max-w-full max-h-full object-contain pointer-events-none"
+                [class.will-change-transform]="idx === openIndex()"
+                [style.transform]="idx === openIndex() ? 'translate(' + panX() + 'px,' + panY() + 'px) scale(' + zoom() + ')' : null"
+                [style.transition]="idx === openIndex() && !swiping() ? 'transform 0.15s ease-out' : 'none'"
+                draggable="false"
+              />
+            </div>
+          }
+        </div>
       </div>
 
       @if (images().length > 1) {
