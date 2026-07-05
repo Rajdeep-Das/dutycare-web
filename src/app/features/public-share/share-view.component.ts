@@ -1,22 +1,31 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ActivityType } from '../doctor/doctor.models';
+
+interface ShareImage {
+  url: string;
+  sortOrder: number;
+}
 
 interface PublicActivity {
   name: string;
   activityDate: string;
   place?: string;
   type: ActivityType;
-  images: { url: string; sortOrder: number }[];
+  images: ShareImage[];
 }
+
+const MAX_ZOOM = 4;
+const MIN_ZOOM = 1;
 
 @Component({
   selector: 'app-share-view',
   standalone: true,
   imports: [DatePipe],
   templateUrl: './share-view.component.html',
+  styleUrl: './share-view.component.scss',
 })
 export class ShareViewComponent {
   private readonly http = inject(HttpClient);
@@ -30,10 +39,34 @@ export class ShareViewComponent {
     this.activity()?.type === 'InFacility' ? 'In-facility' : 'Outreach',
   );
 
+  protected readonly images = computed(() => this.activity()?.images ?? []);
+
+  // --- Lightbox state ---
+  /** Index of the currently open photo, or null when the lightbox is closed. */
+  protected readonly openIndex = signal<number | null>(null);
+  protected readonly zoom = signal(1);
+  /** Pan offset (px) applied while zoomed in. */
+  protected readonly panX = signal(0);
+  protected readonly panY = signal(0);
+
+  protected readonly currentImage = computed(() => {
+    const i = this.openIndex();
+    return i === null ? null : (this.images()[i] ?? null);
+  });
+
+  protected readonly isZoomed = computed(() => this.zoom() > MIN_ZOOM);
+
+  private dragging = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private panStartX = 0;
+  private panStartY = 0;
+
   constructor() {
     const token = this.route.snapshot.paramMap.get('token');
     this.http.get<PublicActivity>(`/api/public/share/${token}`).subscribe({
       next: (a) => {
+        a.images = [...a.images].sort((x, y) => x.sortOrder - y.sortOrder);
         this.activity.set(a);
         this.loading.set(false);
       },
@@ -42,5 +75,114 @@ export class ShareViewComponent {
         this.loading.set(false);
       },
     });
+  }
+
+  // --- Open / close ---
+  protected open(index: number): void {
+    this.openIndex.set(index);
+    this.resetZoom();
+    document.body.style.overflow = 'hidden';
+  }
+
+  protected close(): void {
+    this.openIndex.set(null);
+    document.body.style.overflow = '';
+  }
+
+  // --- Navigation ---
+  protected next(): void {
+    const i = this.openIndex();
+    if (i === null) return;
+    this.openIndex.set((i + 1) % this.images().length);
+    this.resetZoom();
+  }
+
+  protected prev(): void {
+    const i = this.openIndex();
+    if (i === null) return;
+    this.openIndex.set((i - 1 + this.images().length) % this.images().length);
+    this.resetZoom();
+  }
+
+  // --- Zoom ---
+  private resetZoom(): void {
+    this.zoom.set(1);
+    this.panX.set(0);
+    this.panY.set(0);
+  }
+
+  /** Toggle between fit and zoomed on double-click / double-tap. */
+  protected toggleZoom(): void {
+    if (this.isZoomed()) {
+      this.resetZoom();
+    } else {
+      this.zoom.set(2.5);
+    }
+  }
+
+  protected zoomIn(): void {
+    this.zoom.update((z) => Math.min(MAX_ZOOM, +(z + 0.5).toFixed(2)));
+  }
+
+  protected zoomOut(): void {
+    this.zoom.update((z) => {
+      const next = Math.max(MIN_ZOOM, +(z - 0.5).toFixed(2));
+      if (next === MIN_ZOOM) {
+        this.panX.set(0);
+        this.panY.set(0);
+      }
+      return next;
+    });
+  }
+
+  protected onWheel(event: WheelEvent): void {
+    event.preventDefault();
+    if (event.deltaY < 0) this.zoomIn();
+    else this.zoomOut();
+  }
+
+  // --- Pan (drag while zoomed) ---
+  protected onPointerDown(event: PointerEvent): void {
+    if (!this.isZoomed()) return;
+    this.dragging = true;
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
+    this.panStartX = this.panX();
+    this.panStartY = this.panY();
+    (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
+  }
+
+  protected onPointerMove(event: PointerEvent): void {
+    if (!this.dragging) return;
+    this.panX.set(this.panStartX + (event.clientX - this.dragStartX));
+    this.panY.set(this.panStartY + (event.clientY - this.dragStartY));
+  }
+
+  protected onPointerUp(): void {
+    this.dragging = false;
+  }
+
+  // --- Keyboard ---
+  @HostListener('document:keydown', ['$event'])
+  protected onKeydown(event: KeyboardEvent): void {
+    if (this.openIndex() === null) return;
+    switch (event.key) {
+      case 'Escape':
+        this.close();
+        break;
+      case 'ArrowRight':
+        this.next();
+        break;
+      case 'ArrowLeft':
+        this.prev();
+        break;
+      case '+':
+      case '=':
+        this.zoomIn();
+        break;
+      case '-':
+        this.zoomOut();
+        break;
+    }
   }
 }

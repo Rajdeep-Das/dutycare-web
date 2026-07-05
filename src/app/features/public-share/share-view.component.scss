@@ -1,0 +1,103 @@
+:host {
+  display: block;
+}
+
+/* --- Masonry gallery (Google Photos–like columns) --- */
+.gp-masonry {
+  column-gap: 0.75rem;
+  columns: 2;
+
+  @media (min-width: 640px) {
+    columns: 3;
+  }
+  @media (min-width: 1024px) {
+    columns: 4;
+  }
+}
+
+.gp-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  break-inside: avoid;
+  border-radius: 0.75rem;
+
+  img {
+    background: var(--color-neutral-100, #f1f5f9);
+  }
+}
+
+/* --- Lightbox controls --- */
+.gp-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.9);
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.gp-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* --- Thumbnail strip --- */
+.gp-thumb {
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  opacity: 0.5;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition:
+    opacity 0.15s ease,
+    outline-color 0.15s ease;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.gp-thumb-active {
+  opacity: 1;
+  outline-color: #fff;
+}
