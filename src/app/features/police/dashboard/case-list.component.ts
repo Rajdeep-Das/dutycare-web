@@ -1,6 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ButtonComponent } from '../../../shared/design-system/button/button.component';
 import { EmptyStateComponent } from '../../../shared/design-system/empty-state/empty-state.component';
 import { ListItemComponent } from '../../../shared/design-system/list-item/list-item.component';
@@ -17,6 +20,7 @@ import { CaseListItem, CASE_STATUS_LABELS } from '../police.models';
   imports: [
     DatePipe,
     RouterLink,
+    ReactiveFormsModule,
     ButtonComponent,
     EmptyStateComponent,
     ListItemComponent,
@@ -35,12 +39,20 @@ export class CaseListComponent {
   protected readonly showFilters = signal(false);
   protected readonly statusLabels = CASE_STATUS_LABELS;
 
+  /** Single search box: one free-text term, OR-matched server-side across
+   * case number, FIR/external no., person name, vehicle number, district. */
+  protected readonly searchControl = new FormControl('', { nonNullable: true });
+
+  private readonly query = toSignal(
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ),
+    { initialValue: '' },
+  );
+
+  /** Secondary refinement panel for filters a free-text box can't express. */
   protected readonly filterFields: FilterField[] = [
-    { key: 'case_number', label: 'Case number', type: 'text', placeholder: 'e.g. 2026-0001' },
-    { key: 'case_no', label: 'FIR / external no.', type: 'text' },
-    { key: 'person_name', label: 'Person name', type: 'text' },
-    { key: 'vehicle_number', label: 'Vehicle number', type: 'text' },
-    { key: 'district', label: 'District', type: 'text' },
     { key: 'case_date', label: 'Case date', type: 'date-range' },
     {
       key: 'status',
@@ -53,20 +65,36 @@ export class CaseListComponent {
       ],
     },
   ];
+  private activeFilters: FilterValues = {};
 
   constructor() {
-    this.load({});
+    effect(() => this.load(this.query()));
   }
 
-  protected load(filters: FilterValues): void {
+  protected load(term: string): void {
     this.loading.set(true);
-    this.policeApi.search(filters).subscribe({
+    const trimmed = term.trim();
+    const params: FilterValues = { ...this.activeFilters };
+    if (trimmed) params['q'] = trimmed;
+    else delete params['q'];
+
+    this.policeApi.search(params).subscribe({
       next: (res) => {
         this.cases.set(res.items);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  /** Applies the advanced filter panel alongside the current search term. */
+  protected applyFilters(filters: FilterValues): void {
+    this.activeFilters = filters;
+    this.load(this.searchControl.value);
+  }
+
+  protected clearSearch(): void {
+    this.searchControl.setValue('');
   }
 
   protected open(id: string): void {

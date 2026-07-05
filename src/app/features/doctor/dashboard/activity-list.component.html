@@ -62,9 +62,10 @@
       </ds-empty-state>
     }
   } @else {
-    <div class="mt-4 rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden divide-y divide-neutral-100">
-      @for (a of activities(); track a.id) {
+    <div class="mt-4 rounded-xl border border-neutral-200 shadow-sm overflow-hidden divide-y divide-neutral-100">
+      @for (a of activities(); track a.id; let i = $index) {
         <ds-list-item
+          [index]="i"
           [title]="a.name"
           [subtitle]="a.place ?? ''"
           [meta]="(a.activityDate | date: 'mediumDate') ?? ''"

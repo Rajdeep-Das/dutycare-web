@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 /**
  * A tappable row for lists (activities, cases — Plan §11). Title is required;
  * subtitle/meta are optional. Emits `selected` on tap. Content projection slots:
  *   [dsListItemLeading]  — optional leading visual (e.g. thumbnail)
  *   [dsListItemTrailing] — optional trailing visual (e.g. chevron, status)
+ * Pass `index` (0-based position in the list) to get zebra striping —
+ * odd rows get a subtle tinted background, like an alternating table.
  */
 @Component({
   selector: 'ds-list-item',
@@ -14,8 +16,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     <button
       type="button"
       (click)="selected.emit()"
-      class="group w-full flex items-center gap-3 text-left bg-white px-4 py-3.5
-             transition-colors hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none"
+      [class]="rowClasses()"
     >
       <ng-content select="[dsListItemLeading]" />
 
@@ -46,6 +47,15 @@ export class ListItemComponent {
   readonly title = input.required<string>();
   readonly subtitle = input<string>();
   readonly meta = input<string>();
+  readonly index = input<number>(0);
 
   readonly selected = output<void>();
+
+  protected readonly rowClasses = computed(() => {
+    const base =
+      'group w-full flex items-center gap-3 text-left px-4 py-3.5 ' +
+      'transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:outline-none';
+    const zebra = this.index() % 2 === 1 ? 'bg-neutral-50' : 'bg-white';
+    return `${base} ${zebra}`;
+  });
 }
