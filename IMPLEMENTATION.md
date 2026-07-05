@@ -78,17 +78,21 @@ Lazy `features/doctor` (`doctor.routes.ts`). Screens (§11):
 - ☑ Doctor accent (`text-doctor`/`bg-doctor`) applied throughout
 - ☑ Verified through web proxy: SPA routes serve, public share returns safe fields
 
-## Phase 4 — Police module  ☐
+## Phase 4 — Police module  ☑
 
 Lazy `features/police` (`police.routes.ts`). Screens (§11):
 
-- ☐ `case-list.component` + `case-search.component` (dashboard)
-- ☐ `case-create.component`
-- ☐ `case-detail.component`
-- ☐ `case-person-form.component` (persons, phones, profile image)
-- ☐ `case-vehicle-form.component` (vehicles)
-- ☐ Police API service (cases, persons, phones, vehicles, search)
-- ☐ Police accent applied so module is visually distinct
+- ☑ `case-list.component` — dashboard: search bar (case_number/case_no/person_name/
+      vehicle_number/district/date-range/status), skeleton, list, FAB
+- ☑ `case-create.component` — dual create/edit
+- ☑ `case-detail.component` — case summary + status badge; persons section (inline
+      add, profile photo via `ds-image-uploader`, phone chips add/remove, delete);
+      vehicles section (inline add/delete). Incremental workflow (§8).
+- ☑ `police-api.service` (cases, persons, phones, vehicles, profile image, search)
+- ☑ Police accent (`text-police`/`bg-police`, police button variant) throughout
+- ☑ Logout link on police dashboard
+- ☑ Verified through proxy: police1 role scoping (200 /police, 403 /doctor),
+      full flow create→person→phone→photo→vehicle
 
 ## Phase 5 — Admin  ☑
 
