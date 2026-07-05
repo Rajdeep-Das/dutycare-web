@@ -4,13 +4,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from '../../../shared/design-system/button/button.component';
 import { CardComponent } from '../../../shared/design-system/card/card.component';
 import { ImageUploaderComponent, PreparedImage } from '../../../shared/design-system/image-uploader/image-uploader.component';
+import { DsInputDirective } from '../../../shared/design-system/form/ds-input.directive';
+import { PageHeaderComponent } from '../../../shared/design-system/page-header/page-header.component';
 import { DoctorApiService } from '../doctor-api.service';
 import { Activity } from '../doctor.models';
 
 @Component({
   selector: 'app-activity-detail',
   standalone: true,
-  imports: [DatePipe, ButtonComponent, CardComponent, ImageUploaderComponent],
+  imports: [DatePipe, ButtonComponent, CardComponent, ImageUploaderComponent, PageHeaderComponent, DsInputDirective],
   templateUrl: './activity-detail.component.html',
 })
 export class ActivityDetailComponent {

@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="rounded-lg bg-white border border-neutral-200 shadow-sm p-4">
+    <div class="rounded-xl bg-white border border-neutral-200 shadow-sm p-5">
       <ng-content />
     </div>
   `,

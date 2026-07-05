@@ -5,11 +5,12 @@ import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { landingRouteForRole } from '../../core/auth/role-redirect';
 import { ButtonComponent } from '../../shared/design-system/button/button.component';
+import { DsInputDirective } from '../../shared/design-system/form/ds-input.directive';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule, ButtonComponent, DsInputDirective],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {

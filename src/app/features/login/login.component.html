@@ -1,50 +1,42 @@
-<main class="min-h-screen flex items-center justify-center px-4 py-8">
+<main class="min-h-screen flex items-center justify-center px-4 py-8 bg-neutral-50">
   <div class="w-full max-w-sm">
-    <header class="text-center mb-8">
-      <h1 class="font-semibold text-large-title">DutyCare</h1>
+    <div class="text-center mb-8">
+      <div class="mx-auto mb-4 w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-sm">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3l7 4v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V7l7-4z"
+            stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <h1 class="text-large-title font-semibold text-neutral-900">DutyCare</h1>
       <p class="mt-1 text-neutral-500">Sign in to continue</p>
-    </header>
+    </div>
 
-    <form (ngSubmit)="submit()" class="space-y-4" novalidate>
-      <div>
-        <label for="username" class="block mb-1 font-medium text-neutral-700">Username</label>
-        <input
-          id="username"
-          name="username"
-          type="text"
-          autocomplete="username"
-          required
-          [ngModel]="username()"
-          (ngModelChange)="username.set($event)"
-          class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
+    <div class="rounded-xl border border-neutral-200 bg-white shadow-sm p-6">
+      <form (ngSubmit)="submit()" class="space-y-4" novalidate>
+        <div>
+          <label for="username" class="block text-body font-medium text-neutral-700 mb-1.5">Username</label>
+          <input dsInput id="username" name="username" type="text" autocomplete="username" required
+            [ngModel]="username()" (ngModelChange)="username.set($event)" />
+        </div>
+
+        <div>
+          <label for="password" class="block text-body font-medium text-neutral-700 mb-1.5">Password</label>
+          <input dsInput id="password" name="password" type="password" autocomplete="current-password" required
+            [ngModel]="password()" (ngModelChange)="password.set($event)" />
+        </div>
+
+        @if (error()) {
+          <p class="text-error text-body">{{ error() }}</p>
+        }
+
+        <ds-button
+          type="submit"
+          label="Sign in"
+          loadingLabel="Signing in…"
+          [loading]="loading()"
+          [disabled]="!username() || !password()"
         />
-      </div>
-
-      <div>
-        <label for="password" class="block mb-1 font-medium text-neutral-700">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          required
-          [ngModel]="password()"
-          (ngModelChange)="password.set($event)"
-          class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft"
-        />
-      </div>
-
-      @if (error()) {
-        <p class="text-error">{{ error() }}</p>
-      }
-
-      <ds-button
-        type="submit"
-        label="Sign in"
-        loadingLabel="Signing in…"
-        [loading]="loading()"
-        [disabled]="!username() || !password()"
-      />
-    </form>
+      </form>
+    </div>
   </div>
 </main>

@@ -3,12 +3,22 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService, UserRole } from '../../core/auth/auth.service';
 import { ButtonComponent } from '../../shared/design-system/button/button.component';
+import { DsInputDirective } from '../../shared/design-system/form/ds-input.directive';
+import { PageHeaderComponent } from '../../shared/design-system/page-header/page-header.component';
+import { SkeletonListComponent } from '../../shared/design-system/skeleton/skeleton-list.component';
 import { AdminApiService, AdminUser, CreateUserRequest } from './admin-api.service';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [FormsModule, RouterLink, ButtonComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    ButtonComponent,
+    DsInputDirective,
+    PageHeaderComponent,
+    SkeletonListComponent,
+  ],
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
@@ -90,5 +100,18 @@ export class UserListComponent {
 
   protected isSelf(user: AdminUser): boolean {
     return user.username === this.currentUsername;
+  }
+
+  protected roleLabel(role: UserRole): string {
+    return role === 'SuperAdmin' ? 'Super admin' : role;
+  }
+
+  /** Avatar tint by role so the list reads at a glance. */
+  protected avatarClass(role: UserRole): string {
+    return {
+      Doctor: 'bg-doctor-soft text-doctor',
+      Police: 'bg-police-soft text-police',
+      SuperAdmin: 'bg-primary-soft text-primary',
+    }[role];
   }
 }

@@ -1,58 +1,41 @@
-<div class="max-w-lg mx-auto px-4 py-4 pb-16">
-  <header class="flex items-center justify-between mb-4">
-    <h1 class="text-title font-semibold text-neutral-900">Users</h1>
-    <div class="flex items-center gap-1">
-      <button
-        type="button"
-        (click)="toggleCreate()"
-        class="text-primary font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-      >
-        {{ showCreate() ? 'Close' : 'Add user' }}
-      </button>
-      <a
-        routerLink="/logout"
-        class="text-neutral-500 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-      >
-        Logout
-      </a>
-    </div>
-  </header>
+<ds-page-header title="Users">
+  <button
+    dsHeaderAction
+    type="button"
+    (click)="toggleCreate()"
+    class="h-9 px-3 rounded-lg text-body font-medium text-primary hover:bg-primary-soft transition-colors"
+    [class.bg-primary-soft]="showCreate()"
+  >
+    {{ showCreate() ? 'Close' : 'Add user' }}
+  </button>
+  <a
+    dsHeaderAction
+    routerLink="/logout"
+    class="h-9 px-3 flex items-center rounded-lg text-body font-medium text-neutral-500 hover:bg-neutral-100 transition-colors"
+  >
+    Logout
+  </a>
+</ds-page-header>
 
+<div class="max-w-lg mx-auto px-4 py-5 pb-16">
   <!-- Create form (inline) -->
   @if (showCreate()) {
-    <div class="rounded-lg bg-white border border-neutral-200 shadow-sm p-4 mb-5">
-      <div class="space-y-3">
+    <div class="rounded-xl border border-neutral-200 bg-white shadow-sm p-5 mb-5">
+      <div class="space-y-4">
         <div>
-          <label for="u" class="block mb-1 font-medium text-neutral-700">Username</label>
-          <input
-            id="u"
-            type="text"
-            autocomplete="off"
-            [ngModel]="newUsername()"
-            (ngModelChange)="newUsername.set($event)"
-            class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-primary"
-          />
+          <label for="u" class="block text-body font-medium text-neutral-700 mb-1.5">Username</label>
+          <input dsInput id="u" type="text" autocomplete="off"
+            [ngModel]="newUsername()" (ngModelChange)="newUsername.set($event)" />
         </div>
         <div>
-          <label for="p" class="block mb-1 font-medium text-neutral-700">Initial password</label>
-          <input
-            id="p"
-            type="text"
-            autocomplete="off"
-            [ngModel]="newPassword()"
-            (ngModelChange)="newPassword.set($event)"
-            class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-primary"
-          />
-          <p class="mt-1 text-neutral-500">Share this with the user out-of-band; they use it to sign in.</p>
+          <label for="p" class="block text-body font-medium text-neutral-700 mb-1.5">Initial password</label>
+          <input dsInput id="p" type="text" autocomplete="off"
+            [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+          <p class="mt-1.5 text-caption text-neutral-500">Share this with the user out-of-band; they use it to sign in.</p>
         </div>
         <div>
-          <label for="r" class="block mb-1 font-medium text-neutral-700">Role</label>
-          <select
-            id="r"
-            [ngModel]="newRole()"
-            (ngModelChange)="newRole.set($event)"
-            class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-primary bg-white"
-          >
+          <label for="r" class="block text-body font-medium text-neutral-700 mb-1.5">Role</label>
+          <select dsInput id="r" [ngModel]="newRole()" (ngModelChange)="newRole.set($event)">
             <option value="Doctor">Doctor</option>
             <option value="Police">Police</option>
             <option value="SuperAdmin">Super admin</option>
@@ -60,7 +43,7 @@
         </div>
 
         @if (createError()) {
-          <p class="text-error">{{ createError() }}</p>
+          <p class="text-error text-body">{{ createError() }}</p>
         }
 
         <ds-button
@@ -76,31 +59,43 @@
 
   <!-- User list -->
   @if (loading()) {
-    <p class="py-8 text-center text-neutral-500">Loading…</p>
+    <div class="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+      <ds-skeleton-list [count]="3" />
+    </div>
   } @else {
-    <ul class="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white overflow-hidden">
+    <ul class="divide-y divide-neutral-100 rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
       @for (u of users(); track u.id) {
-        <li class="flex items-center gap-3 px-4 py-3">
+        <li class="flex items-center gap-3 px-4 py-3.5">
+          <span
+            class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-caption font-semibold"
+            [class]="avatarClass(u.role)"
+          >
+            {{ u.username.charAt(0).toUpperCase() }}
+          </span>
+
           <span class="flex-1 min-w-0">
             <span class="block font-medium text-neutral-900 truncate">
               {{ u.username }}
               @if (isSelf(u)) { <span class="text-neutral-400 font-normal">(you)</span> }
             </span>
-            <span class="block text-neutral-500">
-              {{ u.role }}
-              @if (!u.isActive) { · <span class="text-error">inactive</span> }
+            <span class="flex items-center gap-1.5 text-caption text-neutral-500">
+              {{ roleLabel(u.role) }}
+              @if (!u.isActive) {
+                <span class="inline-flex items-center rounded-full bg-error-soft text-error px-2 py-0.5 font-medium">
+                  inactive
+                </span>
+              }
             </span>
           </span>
 
           @if (isSelf(u)) {
-            <span class="text-neutral-400 text-sm">—</span>
+            <span class="text-neutral-300 text-caption">—</span>
           } @else {
             <button
               type="button"
               (click)="toggleStatus(u)"
-              class="text-sm font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-              [class.text-error]="u.isActive"
-              [class.text-success]="!u.isActive"
+              class="text-caption font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+              [class]="u.isActive ? 'text-error hover:bg-error-soft' : 'text-success hover:bg-success-soft'"
             >
               {{ u.isActive ? 'Deactivate' : 'Activate' }}
             </button>

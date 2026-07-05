@@ -1,68 +1,46 @@
-<div class="max-w-lg mx-auto px-4 py-4">
-  <header class="flex items-center gap-3 mb-5">
-    <button type="button" (click)="cancel()" class="text-neutral-600 text-2xl leading-none">←</button>
-    <h1 class="text-title font-semibold text-doctor">{{ isEdit() ? 'Edit activity' : 'New activity' }}</h1>
-  </header>
+<ds-page-header
+  [title]="isEdit() ? 'Edit activity' : 'New activity'"
+  accent="doctor"
+  [back]="true"
+  (backClick)="cancel()"
+/>
 
-  <form (ngSubmit)="save()" class="space-y-4" novalidate>
+<div class="max-w-lg mx-auto px-4 py-5">
+  <form (ngSubmit)="save()" class="space-y-5" novalidate>
     <div>
-      <label for="name" class="block mb-1 font-medium text-neutral-700">Name</label>
-      <input
-        id="name"
-        name="name"
-        type="text"
-        required
-        [ngModel]="name()"
-        (ngModelChange)="name.set($event)"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-doctor"
-      />
+      <label for="name" class="block text-body font-medium text-neutral-700 mb-1.5">Name</label>
+      <input dsInput id="name" name="name" type="text" required
+        [ngModel]="name()" (ngModelChange)="name.set($event)" />
     </div>
 
     <div>
-      <label for="date" class="block mb-1 font-medium text-neutral-700">Date</label>
-      <input
-        id="date"
-        name="date"
-        type="date"
-        required
-        [ngModel]="activityDate()"
-        (ngModelChange)="activityDate.set($event)"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-doctor"
-      />
+      <label for="date" class="block text-body font-medium text-neutral-700 mb-1.5">Date</label>
+      <input dsInput id="date" name="date" type="date" required
+        [ngModel]="activityDate()" (ngModelChange)="activityDate.set($event)" />
     </div>
 
     <div>
-      <label for="place" class="block mb-1 font-medium text-neutral-700">Place</label>
-      <input
-        id="place"
-        name="place"
-        type="text"
-        [ngModel]="place()"
-        (ngModelChange)="place.set($event)"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-doctor"
-      />
+      <label for="place" class="block text-body font-medium text-neutral-700 mb-1.5">Place</label>
+      <input dsInput id="place" name="place" type="text"
+        [ngModel]="place()" (ngModelChange)="place.set($event)" />
     </div>
 
     <div>
-      <label for="type" class="block mb-1 font-medium text-neutral-700">Type</label>
-      <select
-        id="type"
-        name="type"
-        [ngModel]="type()"
-        (ngModelChange)="type.set($event)"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2.5 outline-none focus:border-doctor bg-white"
-      >
+      <label for="type" class="block text-body font-medium text-neutral-700 mb-1.5">Type</label>
+      <select dsInput id="type" name="type"
+        [ngModel]="type()" (ngModelChange)="type.set($event)">
         <option value="OutReach">Outreach</option>
         <option value="InFacility">In-facility</option>
       </select>
     </div>
 
     @if (error()) {
-      <p class="text-error">{{ error() }}</p>
+      <p class="text-error text-body">{{ error() }}</p>
     }
 
     <ds-button
       type="submit"
+      variant="doctor"
       [label]="isEdit() ? 'Save changes' : 'Save activity'"
       loadingLabel="Saving…"
       [loading]="saving()"

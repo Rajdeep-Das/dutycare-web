@@ -2,6 +2,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from '../../../shared/design-system/button/button.component';
+import { DsInputDirective } from '../../../shared/design-system/form/ds-input.directive';
+import { PageHeaderComponent } from '../../../shared/design-system/page-header/page-header.component';
 import { DoctorApiService } from '../doctor-api.service';
 import { ActivityType } from '../doctor.models';
 
@@ -9,7 +11,7 @@ import { ActivityType } from '../doctor.models';
 @Component({
   selector: 'app-activity-create',
   standalone: true,
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule, ButtonComponent, DsInputDirective, PageHeaderComponent],
   templateUrl: './activity-create.component.html',
 })
 export class ActivityCreateComponent {

@@ -1,63 +1,63 @@
-<div class="max-w-lg mx-auto pb-24">
-  <header class="sticky top-0 bg-neutral-50 px-4 pt-4 pb-3 border-b border-neutral-200 z-10">
-    <div class="flex items-center justify-between">
-      <h1 class="text-title font-semibold text-doctor">Activities</h1>
-      <div class="flex items-center gap-1">
-        <button
-          type="button"
-          (click)="toggleFilters()"
-          class="text-neutral-600 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-        >
-          {{ showFilters() ? 'Hide' : 'Filter' }}
-        </button>
-        <a
-          routerLink="/logout"
-          class="text-neutral-500 font-medium px-3 py-1.5 rounded-md hover:bg-neutral-100"
-        >
-          Logout
-        </a>
-      </div>
-    </div>
+<ds-page-header title="Activities" accent="doctor">
+  <button
+    dsHeaderAction
+    type="button"
+    (click)="toggleFilters()"
+    class="h-9 px-3 rounded-lg text-body font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
+    [class.bg-neutral-100]="showFilters()"
+  >
+    Filter
+  </button>
+  <a
+    dsHeaderAction
+    routerLink="/logout"
+    class="h-9 px-3 flex items-center rounded-lg text-body font-medium text-neutral-500 hover:bg-neutral-100 transition-colors"
+  >
+    Logout
+  </a>
+</ds-page-header>
 
-    @if (showFilters()) {
-      <div class="mt-3">
-        <ds-search-filter-bar [fields]="filterFields" (search)="load($event)" />
-      </div>
-    }
-  </header>
+<div class="max-w-lg mx-auto px-4 pb-28">
+  @if (showFilters()) {
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+      <ds-search-filter-bar [fields]="filterFields" (search)="load($event)" />
+    </div>
+  }
 
   @if (loading()) {
-    <p class="px-4 py-8 text-center text-neutral-500">Loading…</p>
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white overflow-hidden">
+      <ds-skeleton-list />
+    </div>
   } @else if (activities().length === 0) {
     <ds-empty-state
       title="No activities yet"
-      message="Record a camp or outreach activity to see it here."
+      message="Record a camp or outreach activity and it will show up here."
     >
-      <ds-button label="Add activity" [block]="false" (pressed)="create()" />
+      <ds-button label="Add activity" variant="doctor" [block]="false" (pressed)="create()" />
     </ds-empty-state>
   } @else {
-    <ul>
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden divide-y divide-neutral-100">
       @for (a of activities(); track a.id) {
-        <li>
-          <ds-list-item
-            [title]="a.name"
-            [subtitle]="a.place ?? ''"
-            [meta]="(a.activityDate | date: 'mediumDate') ?? ''"
-            (selected)="open(a.id)"
-          />
-        </li>
+        <ds-list-item
+          [title]="a.name"
+          [subtitle]="a.place ?? ''"
+          [meta]="(a.activityDate | date: 'mediumDate') ?? ''"
+          (selected)="open(a.id)"
+        />
       }
-    </ul>
+    </div>
   }
-
-  <!-- Floating add button (mobile-first primary action) -->
-  <button
-    type="button"
-    (click)="create()"
-    aria-label="Add activity"
-    class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-doctor text-white text-3xl
-           leading-none shadow-lg flex items-center justify-center active:scale-95"
-  >
-    +
-  </button>
 </div>
+
+<!-- Floating add button -->
+<button
+  type="button"
+  (click)="create()"
+  aria-label="Add activity"
+  class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-doctor text-white shadow-lg
+         flex items-center justify-center transition-transform active:scale-95 hover:shadow-xl"
+>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+  </svg>
+</button>
