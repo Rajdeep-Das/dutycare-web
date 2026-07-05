@@ -72,13 +72,23 @@
         </div>
       </div>
 
-      <!-- Stage -->
-      <div class="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+      <!-- Stage — gestures live here so swipe works over the letterboxed area too -->
+      <div
+        class="gp-stage relative flex-1 min-h-0 flex items-center justify-center overflow-hidden"
+        [class.cursor-zoom-in]="!isZoomed()"
+        [class.cursor-grab]="isZoomed()"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp()"
+        (pointercancel)="onPointerUp()"
+        (dblclick)="toggleZoom()"
+      >
         @if (images().length > 1) {
-          <button type="button" class="gp-nav left-2 sm:left-5" (click)="prev()" aria-label="Previous">
+          <!-- Arrows: hidden on touch/small screens where users swipe instead -->
+          <button type="button" class="gp-nav gp-nav-desktop left-2 sm:left-5" (click)="prev()" aria-label="Previous">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <button type="button" class="gp-nav right-2 sm:right-5" (click)="next()" aria-label="Next">
+          <button type="button" class="gp-nav gp-nav-desktop right-2 sm:right-5" (click)="next()" aria-label="Next">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         }
@@ -86,19 +96,18 @@
         <img
           [src]="img.url"
           alt=""
-          class="max-w-full max-h-full object-contain will-change-transform"
-          [class.cursor-zoom-in]="!isZoomed()"
-          [class.cursor-grab]="isZoomed()"
-          [style.transform]="'translate(' + panX() + 'px,' + panY() + 'px) scale(' + zoom() + ')'"
-          [style.transition]="'transform 0.15s ease-out'"
-          (dblclick)="toggleZoom()"
-          (pointerdown)="onPointerDown($event)"
-          (pointermove)="onPointerMove($event)"
-          (pointerup)="onPointerUp()"
-          (pointercancel)="onPointerUp()"
+          class="max-w-full max-h-full object-contain will-change-transform pointer-events-none"
+          [style.transform]="'translate(' + (panX() + swipeX()) + 'px,' + panY() + 'px) scale(' + zoom() + ')'"
+          [style.transition]="swiping() ? 'none' : 'transform 0.15s ease-out'"
           draggable="false"
         />
       </div>
+
+      @if (images().length > 1) {
+        <p class="gp-swipe-hint sm:hidden shrink-0 text-center text-xs text-white/40 pb-1">
+          Swipe to see more
+        </p>
+      }
 
       <!-- Thumbnail strip -->
       @if (images().length > 1) {

@@ -54,6 +54,12 @@
   }
 }
 
+/* Stage: swallow native touch gestures so horizontal swipe drives navigation
+   and vertical drag doesn't scroll the page underneath. */
+.gp-stage {
+  touch-action: none;
+}
+
 .gp-nav {
   position: absolute;
   top: 50%;
@@ -72,6 +78,13 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* On touch / coarse-pointer devices, hide the arrows — users swipe instead. */
+@media (hover: none), (pointer: coarse) {
+  .gp-nav-desktop {
+    display: none;
   }
 }
 
