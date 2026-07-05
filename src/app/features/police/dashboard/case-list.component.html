@@ -1,0 +1,59 @@
+<ds-page-header title="Cases" accent="police">
+  <button
+    dsHeaderAction
+    type="button"
+    (click)="toggleFilters()"
+    class="h-9 px-3 rounded-lg text-body font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
+    [class.bg-neutral-100]="showFilters()"
+  >
+    Filter
+  </button>
+  <a
+    dsHeaderAction
+    routerLink="/logout"
+    class="h-9 px-3 flex items-center rounded-lg text-body font-medium text-neutral-500 hover:bg-neutral-100 transition-colors"
+  >
+    Logout
+  </a>
+</ds-page-header>
+
+<div class="max-w-lg mx-auto px-4 pb-28">
+  @if (showFilters()) {
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+      <ds-search-filter-bar [fields]="filterFields" (search)="load($event)" />
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white overflow-hidden">
+      <ds-skeleton-list />
+    </div>
+  } @else if (cases().length === 0) {
+    <ds-empty-state title="No cases yet" message="Open a case and add details as the investigation progresses.">
+      <ds-button label="New case" variant="police" [block]="false" (pressed)="create()" />
+    </ds-empty-state>
+  } @else {
+    <div class="mt-4 rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden divide-y divide-neutral-100">
+      @for (c of cases(); track c.id) {
+        <ds-list-item
+          [title]="c.caseNumber + (c.caseNo ? ' · ' + c.caseNo : '')"
+          [subtitle]="statusLabels[c.status]"
+          [meta]="(c.caseDate | date: 'mediumDate') ?? ''"
+          (selected)="open(c.id)"
+        />
+      }
+    </div>
+  }
+</div>
+
+<button
+  type="button"
+  (click)="create()"
+  aria-label="New case"
+  class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-police text-white shadow-lg
+         flex items-center justify-center transition-transform active:scale-95 hover:shadow-xl"
+>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+  </svg>
+</button>

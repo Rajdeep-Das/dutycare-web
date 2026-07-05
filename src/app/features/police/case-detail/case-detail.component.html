@@ -1,0 +1,188 @@
+<ds-page-header title="Case" accent="police" [back]="true" (backClick)="back()">
+  @if (caseData()) {
+    <button dsHeaderAction type="button" (click)="edit()"
+      class="h-9 px-3 rounded-lg text-body font-medium text-police hover:bg-police-soft transition-colors">
+      Edit
+    </button>
+  }
+</ds-page-header>
+
+<div class="max-w-lg mx-auto px-4 py-5 pb-16">
+  @if (loading()) {
+    <div class="rounded-xl border border-neutral-200 bg-white p-5 space-y-3">
+      <div class="ds-skeleton h-5 w-1/2"></div>
+      <div class="ds-skeleton h-3.5 w-2/3"></div>
+    </div>
+  } @else if (caseData(); as c) {
+    <!-- Case summary -->
+    <ds-card>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-title font-semibold text-neutral-900 tabular-nums">{{ c.caseNumber }}</h2>
+          @if (c.caseNo) {
+            <p class="text-caption text-neutral-500 mt-0.5">FIR / ext: {{ c.caseNo }}</p>
+          }
+        </div>
+        <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-caption font-medium"
+          [class]="statusBadgeClass(c.status)">
+          {{ statusLabels[c.status] }}
+        </span>
+      </div>
+      <dl class="mt-4 space-y-3">
+        <div class="flex items-center gap-3">
+          <dt class="w-20 shrink-0 text-caption font-medium uppercase tracking-wide text-neutral-400">Date</dt>
+          <dd class="text-neutral-800">{{ c.caseDate | date: 'mediumDate' }}</dd>
+        </div>
+        @if (c.description) {
+          <div class="flex gap-3">
+            <dt class="w-20 shrink-0 text-caption font-medium uppercase tracking-wide text-neutral-400">Details</dt>
+            <dd class="text-neutral-800 whitespace-pre-line">{{ c.description }}</dd>
+          </div>
+        }
+      </dl>
+    </ds-card>
+
+    <!-- Persons -->
+    <section class="mt-6">
+      <div class="flex items-center justify-between mb-2.5">
+        <h3 class="text-caption font-semibold uppercase tracking-wide text-neutral-400">
+          Persons ({{ c.persons.length }})
+        </h3>
+        <button type="button" (click)="togglePersonForm()"
+          class="text-caption font-medium text-police px-2 py-1 rounded-md hover:bg-police-soft transition-colors">
+          {{ showPersonForm() ? 'Cancel' : '+ Add person' }}
+        </button>
+      </div>
+
+      @if (showPersonForm()) {
+        <div class="rounded-xl border border-neutral-200 bg-white shadow-sm p-4 mb-3 space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <input dsInput placeholder="First name" name="pf" [ngModel]="pFirst()" (ngModelChange)="pFirst.set($event)" />
+            <input dsInput placeholder="Last name" name="pl" [ngModel]="pLast()" (ngModelChange)="pLast.set($event)" />
+          </div>
+          <select dsInput name="pt" [ngModel]="pType()" (ngModelChange)="pType.set($event)">
+            <option value="Accused">Accused</option>
+            <option value="Criminal">Criminal</option>
+          </select>
+          <input dsInput placeholder="District" name="pd" [ngModel]="pDistrict()" (ngModelChange)="pDistrict.set($event)" />
+          <input dsInput placeholder="Address (house, street, landmark)" name="pa" [ngModel]="pAddress()" (ngModelChange)="pAddress.set($event)" />
+          <ds-button label="Add person" variant="police" loadingLabel="Adding…" [loading]="savingPerson()" [disabled]="!pFirst()" (pressed)="addPerson()" />
+        </div>
+      }
+
+      @for (p of c.persons; track p.id) {
+        <div class="rounded-xl border border-neutral-200 bg-white shadow-sm p-4 mb-3">
+          <div class="flex items-start gap-3">
+            <!-- Profile photo / uploader -->
+            @if (p.profileImageUrl) {
+              <div class="relative shrink-0">
+                <img [src]="p.profileImageUrl" alt="" class="w-14 h-14 rounded-lg object-cover border border-neutral-200" />
+                <button type="button" (click)="removeProfileImage(p.id)" aria-label="Remove photo"
+                  class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-neutral-900/60 text-white flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            } @else {
+              <div class="shrink-0 w-14">
+                <ds-image-uploader
+                  label="Photo"
+                  hint=""
+                  [uploading]="uploadingPhotoFor() === p.id"
+                  (prepared)="onProfilePrepared(p.id, $event)"
+                />
+              </div>
+            }
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-neutral-900 truncate">{{ p.firstName }} {{ p.lastName }}</span>
+                <span class="shrink-0 inline-flex items-center rounded-full bg-neutral-100 text-neutral-600 px-2 py-0.5 text-caption font-medium">
+                  {{ p.caseType }}
+                </span>
+              </div>
+              @if (p.district || p.addressLine) {
+                <p class="text-caption text-neutral-500 mt-0.5 truncate">
+                  {{ p.addressLine }}@if (p.addressLine && p.district) {, }{{ p.district }}
+                </p>
+              }
+
+              <!-- Phones -->
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                @for (ph of p.phones; track ph.id) {
+                  <span class="inline-flex items-center gap-1 rounded-full bg-neutral-100 text-neutral-700 pl-2.5 pr-1 py-0.5 text-caption tabular-nums">
+                    {{ ph.phoneNumber }}
+                    <button type="button" (click)="deletePhone(ph.id)" aria-label="Remove phone"
+                      class="w-4 h-4 rounded-full hover:bg-neutral-300 flex items-center justify-center text-neutral-500">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </button>
+                  </span>
+                }
+              </div>
+              <div class="mt-2 flex gap-2">
+                <input dsInput type="tel" placeholder="Add phone" class="!py-1.5 text-body"
+                  [ngModel]="phoneDraft(p.id)" (ngModelChange)="setPhoneDraft(p.id, $event)" [name]="'phone_' + p.id" />
+                <ds-button label="Add" variant="secondary" [block]="false" (pressed)="addPhone(p)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-neutral-100 text-right">
+            <button type="button" (click)="deletePerson(p.id)"
+              class="text-caption font-medium text-error px-2 py-1 rounded-md hover:bg-error-soft transition-colors">
+              Remove person
+            </button>
+          </div>
+        </div>
+      } @empty {
+        @if (!showPersonForm()) {
+          <p class="text-body text-neutral-500 px-1">No persons added yet.</p>
+        }
+      }
+    </section>
+
+    <!-- Vehicles -->
+    <section class="mt-6">
+      <div class="flex items-center justify-between mb-2.5">
+        <h3 class="text-caption font-semibold uppercase tracking-wide text-neutral-400">
+          Vehicles ({{ c.vehicles.length }})
+        </h3>
+        <button type="button" (click)="toggleVehicleForm()"
+          class="text-caption font-medium text-police px-2 py-1 rounded-md hover:bg-police-soft transition-colors">
+          {{ showVehicleForm() ? 'Cancel' : '+ Add vehicle' }}
+        </button>
+      </div>
+
+      @if (showVehicleForm()) {
+        <div class="rounded-xl border border-neutral-200 bg-white shadow-sm p-4 mb-3 space-y-3">
+          <input dsInput placeholder="Registration number" name="vr" [ngModel]="vReg()" (ngModelChange)="vReg.set($event)" />
+          <div class="grid grid-cols-2 gap-2">
+            <input dsInput placeholder="Make" name="vm" [ngModel]="vMake()" (ngModelChange)="vMake.set($event)" />
+            <input dsInput placeholder="Colour" name="vc" [ngModel]="vColor()" (ngModelChange)="vColor.set($event)" />
+          </div>
+          <ds-button label="Add vehicle" variant="police" loadingLabel="Adding…" [loading]="savingVehicle()" [disabled]="!vReg()" (pressed)="addVehicle()" />
+        </div>
+      }
+
+      @for (v of c.vehicles; track v.id) {
+        <div class="rounded-xl border border-neutral-200 bg-white shadow-sm px-4 py-3 mb-2 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="font-medium text-neutral-900 tabular-nums">{{ v.registrationNumber }}</p>
+            @if (v.make || v.model || v.color) {
+              <p class="text-caption text-neutral-500 truncate">{{ vehicleDetail(v) }}</p>
+            }
+          </div>
+          <button type="button" (click)="deleteVehicle(v.id)"
+            class="shrink-0 text-caption font-medium text-error px-2 py-1 rounded-md hover:bg-error-soft transition-colors">
+            Remove
+          </button>
+        </div>
+      } @empty {
+        @if (!showVehicleForm()) {
+          <p class="text-body text-neutral-500 px-1">No vehicles added yet.</p>
+        }
+      }
+    </section>
+  } @else {
+    <p class="py-12 text-center text-neutral-500">Case not found.</p>
+  }
+</div>
