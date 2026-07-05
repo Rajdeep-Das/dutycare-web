@@ -85,6 +85,25 @@
           <input dsInput readonly [value]="url" class="flex-1 !bg-neutral-50 text-neutral-600" />
           <ds-button label="Copy" [block]="false" variant="secondary" (pressed)="copyShare()" />
         </div>
+        @if (qrDataUrl(); as qr) {
+          <div class="mt-4 flex items-center gap-4">
+            <img
+              [src]="qr"
+              alt="QR code for the share link"
+              width="120"
+              height="120"
+              class="rounded-md border border-neutral-200 bg-white p-1.5"
+            />
+            <div class="flex flex-col gap-2">
+              <p class="text-caption text-neutral-500">Scan the QR to open the shared activity.</p>
+              @if (canShareFiles) {
+                <ds-button label="Share QR" [block]="false" variant="secondary" (pressed)="shareQr()" />
+              } @else {
+                <ds-button label="Download QR" [block]="false" variant="secondary" (pressed)="downloadQr()" />
+              }
+            </div>
+          </div>
+        }
       } @else {
         <ds-button
           label="Create share link"
