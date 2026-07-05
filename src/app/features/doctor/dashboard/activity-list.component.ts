@@ -1,12 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ButtonComponent } from '../../../shared/design-system/button/button.component';
 import { EmptyStateComponent } from '../../../shared/design-system/empty-state/empty-state.component';
 import { ListItemComponent } from '../../../shared/design-system/list-item/list-item.component';
 import { PageHeaderComponent } from '../../../shared/design-system/page-header/page-header.component';
-import { SearchFilterBarComponent } from '../../../shared/design-system/search-filter-bar/search-filter-bar.component';
-import { FilterField, FilterValues } from '../../../shared/design-system/search-filter-bar/search-filter.model';
 import { SkeletonListComponent } from '../../../shared/design-system/skeleton/skeleton-list.component';
 import { DoctorApiService } from '../doctor-api.service';
 import { ActivityListItem } from '../doctor.models';
@@ -17,11 +18,11 @@ import { ActivityListItem } from '../doctor.models';
   imports: [
     DatePipe,
     RouterLink,
+    ReactiveFormsModule,
     ButtonComponent,
     EmptyStateComponent,
     ListItemComponent,
     PageHeaderComponent,
-    SearchFilterBarComponent,
     SkeletonListComponent,
   ],
   templateUrl: './activity-list.component.html',
@@ -32,30 +33,30 @@ export class ActivityListComponent {
 
   protected readonly activities = signal<ActivityListItem[]>([]);
   protected readonly loading = signal(true);
-  protected readonly showFilters = signal(false);
 
-  protected readonly filterFields: FilterField[] = [
-    { key: 'name', label: 'Name', type: 'text', placeholder: 'Activity name' },
-    { key: 'place', label: 'Place', type: 'text', placeholder: 'Place' },
-    { key: 'date', label: 'Date', type: 'date-range' },
-    {
-      key: 'type',
-      label: 'Type',
-      type: 'select',
-      options: [
-        { value: 'InFacility', label: 'In-facility' },
-        { value: 'OutReach', label: 'Outreach' },
-      ],
-    },
-  ];
+  /** Single Google-Photos-style search box. */
+  protected readonly searchControl = new FormControl('', { nonNullable: true });
+
+  /** Debounced search term, driven by the input. */
+  private readonly query = toSignal(
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ),
+    { initialValue: '' },
+  );
 
   constructor() {
-    this.load({});
+    // Re-run the search whenever the debounced query changes (incl. the initial load).
+    effect(() => this.load(this.query()));
   }
 
-  protected load(filters: FilterValues): void {
+  protected load(term: string): void {
     this.loading.set(true);
-    this.doctorApi.search(filters).subscribe({
+    const trimmed = term.trim();
+    // One free-text param — the backend matches broadly (name, place, …).
+    const params: Record<string, string> = trimmed ? { q: trimmed } : {};
+    this.doctorApi.search(params).subscribe({
       next: (res) => {
         this.activities.set(res.items);
         this.loading.set(false);
@@ -64,15 +65,15 @@ export class ActivityListComponent {
     });
   }
 
+  protected clearSearch(): void {
+    this.searchControl.setValue('');
+  }
+
   protected open(id: string): void {
     this.router.navigate(['/doctor', id]);
   }
 
   protected create(): void {
     this.router.navigate(['/doctor', 'create']);
-  }
-
-  protected toggleFilters(): void {
-    this.showFilters.update((v) => !v);
   }
 }
